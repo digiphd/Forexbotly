@@ -32,3 +32,15 @@ You can configure several parameters in the app.py file to customize the bot's b
 11. `limit_distance`: the distance of the take profit from the entry price.
 
 By modifying these parameters, you can customize the bot's behavior to suit your trading preferences.
+
+
+## Custom Backtesting Framework
+Our custom backtesting framework allows you to test and evaluate your trading strategies using historical data before you start trading with real money. By simulating trades based on past market data, you can gain insights into the potential performance and risk associated with your strategies.
+
+To use the backtesting framework, set the `test` flag to `True` when initializing the main trading. This won't place any real time trades at all, it just focuses on pulling down historical data.
+
+## RateLimitErros
+
+Note, the IG API have rate limits and they are quite vauge to what they are. I suspect for new accounts the rate limits are higher from experience.
+
+
