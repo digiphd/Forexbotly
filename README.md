@@ -1,5 +1,5 @@
 # Forexbotly
-# TODO: This project is a work in progress
+### TODO: This project is a work in progress
 Forexbotly is a Python-based bot that uses the IG API to implement a trading strategy for forex markets. The bot uses technical analysis to identify market stages and calculate support and resistance levels for various currency pairs. It also implements three different trading strategies for different market stages.
 
 **Note: the strategies used here are untested, please use at your own risk and manage you money wisely. Backtest every strategy that you implement.**
