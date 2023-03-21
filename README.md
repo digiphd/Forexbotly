@@ -9,9 +9,9 @@ To set up the bot and run it on your machine, you can follow these steps:
 
 1. Clone the repository from GitHub using `git clone https://github.com/digiphd/Forexbotly.git`
 2. Install the required packages using `pip install -r requirements.txt`.
-3. Copy the config_sample.ini file and rename it to config.ini.
-4. Edit the config.ini file and add your IG account credentials and API key.
-5. In the app.py file, update the acc_type and currency_pairs variables to match your trading preferences.
+3. Copy the `config_sample.ini` file and rename it to config.ini.
+4. Edit the `config.ini` file and add your IG account credentials and API key.
+5. In the `app.py` file, update the `acc_type` and `currency_pairs` variables to match your trading preferences.
 6. Run the bot using the command `python app.py`
 
 
