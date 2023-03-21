@@ -2,13 +2,26 @@ import pandas as pd
 import numpy as np
 
 class BacktestingFramework:
+    """
+    A class representing a backtesting framework for forex trading strategies.
+    """
 
     def __init__(self, forex_trading, initial_balance, risk_strategy):
+        """
+        Initializes a BacktestingFramework object with the given forex_trading object, initial_balance, and risk_strategy.
+        :param forex_trading: ForexTrading object containing trading strategies and market data
+        :param initial_balance: The initial balance to start the backtest with
+        :param risk_strategy: The risk strategy to use during the backtest (e.g., 'safe', 'moderate', 'risky', or 'extreme')
+        """
         self.forex_trading = forex_trading
         self.initial_balance = initial_balance
         self.set_risk_strategy(risk_strategy)
 
     def set_risk_strategy(self, risk_strategy):
+        """
+        Sets the risk strategy for the backtest.
+        :param risk_strategy: The risk strategy to use during the backtest (e.g., 'safe', 'moderate', 'risky', or 'extreme')
+        """
         risk_mapping = {
             'safe': 0.01,
             'moderate': 0.1,
@@ -20,6 +33,12 @@ class BacktestingFramework:
         self.is_extreme = risk_strategy == 'extreme'
 
     def run_backtest(self, strategy_func, data):
+        """
+        Runs a backtest using the given strategy function and data.
+        :param strategy_func: A function that takes market data and returns a DataFrame of trade signals
+        :param data: A DataFrame containing market data
+        :return: A dictionary containing backtest results
+        """
         trades = strategy_func(data)
         trades['long_entry'] = trades['long_entry'].astype(int)
         trades['long_exit'] = trades['long_exit'].astype(int)
@@ -61,6 +80,10 @@ class BacktestingFramework:
         }
 
     def backtest_strategies(self):
+        """
+        Runs backtests for all the strategies in the forex_trading object.
+        :return: A dictionary containing backtest results for each strategy
+        """
         backtest_results = {}
 
         for pair, strategy_func in self.forex_trading.strategies.items():
@@ -69,3 +92,4 @@ class BacktestingFramework:
             backtest_results[pair] = results
 
         return backtest_results
+

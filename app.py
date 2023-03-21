@@ -8,10 +8,20 @@ from tenacity import Retrying, wait_exponential, retry_if_exception_type
 from trading_ig.rest import ApiExceededException
 import configparser
 
-
 class ForexTrading:
-
     def __init__(self, username, password, api_key, acc_type, currency_pairs, resolution='H', test=True):
+        """
+        Initialize the ForexTrading class.
+
+        Parameters:
+        - username (str): The user's IG trading account username.
+        - password (str): The user's IG trading account password.
+        - api_key (str): The user's IG trading API key.
+        - acc_type (str): The user's IG trading account type.
+        - currency_pairs (list): The list of currency pairs to trade.
+        - resolution (str): The resolution of historical data ('H' for hourly, 'D' for daily, etc.).
+        - test (bool): If True, use backtesting. If False, use live trading.
+        """
         self.username = username
         self.password = password
         self.api_key = api_key
@@ -29,8 +39,12 @@ class ForexTrading:
         self.market_stages = {}
 
     def determine_market_stage(self):
-        
+        """
+        Determine the market stage for each currency pair.
 
+        Returns:
+        - market_stages (dict): A dictionary containing the market stage, volatility, and historical data for each currency pair.
+        """
         for pair in self.currency_pairs:
             # Fetch historical data for the currency pair
             # Calculate the market stage and volatility
@@ -44,6 +58,17 @@ class ForexTrading:
         return self.market_stages
 
     def _calculate_market_stage(self, currency_pair):
+        """
+        Calculate the market stage for a given currency pair.
+
+        Parameters:
+        - currency_pair (str): The currency pair to calculate the market stage for.
+
+        Returns:
+        - stage (str): The market stage ('Bull', 'Bear', or 'Consolidation').
+        - volatility (float): The volatility of the currency pair.
+        - data (DataFrame): The historical data for the currency pair.
+        """
         # Fetch historical data for the currency pair
         data = self._fetch_historical_data(currency_pair, resolution=self.resolution)
         df = pd.DataFrame(data)
@@ -66,6 +91,17 @@ class ForexTrading:
         return stage, volatility, data
 
     def _fetch_historical_data(self, currency_pair, resolution='D', num_points=200):
+        """
+        Fetch historical data for a given currency pair.
+
+        Parameters:
+        - currency_pair (str): The currency pair to fetch historical data for.
+        - resolution (str): The resolution of historical data ('H' for hourly, 'D' for daily, etc.).
+        - num_points (int): The number of data points to fetch.
+
+        Returns:
+        - data (DataFrame): The historical data for the currency pair.
+        """
         request = self.ig_service.fetch_historical_prices_by_epic_and_num_points(
             currency_pair, resolution, num_points)
         data = request['prices']
@@ -90,8 +126,19 @@ class ForexTrading:
 
         return data
 
-
     def _calculate_volatility(self, df, period=14, low_factor=0.5, high_factor=1.5):
+        """
+        Calculate the volatility for a given DataFrame.
+
+        Parameters:
+        - df (DataFrame): The DataFrame to calculate the volatility for.
+        - period (int): The period for the Average True Range calculation.
+        - low_factor (float): The multiplier for the low volatility threshold.
+        - high_factor (float): The multiplier for the high volatility threshold.
+
+        Returns:
+        - atr (float): The volatility of the DataFrame (e.g., Average True Range).
+        """
         # Calculate True Range
         df['previous_close'] = df['close'].shift(1)
         df['high_low'] = df['high'] - df['low']
@@ -114,6 +161,19 @@ class ForexTrading:
         return atr
 
     def calculate_support_resistance(self, high, low, close, window=14):
+        """
+        Calculate support and resistance levels for a given DataFrame.
+
+        Parameters:
+        - high (Series): High prices data.
+        - low (Series): Low prices data.
+        - close (Series): Close prices data.
+        - window (int): The window size for the rolling mean calculation.
+
+        Returns:
+        - support (Series): The support levels.
+        - resistance (Series): The resistance levels.
+        """
         # Calculate the pivot point
         pivot_point = (high + low + close) / 3
 
@@ -130,8 +190,17 @@ class ForexTrading:
 
         return support, resistance
 
-    def bull_strategy(self, volatilaty, data):
+    def bull_strategy(self, volatility, data):
+        """
+        Implement the strategy for Bull market stage.
 
+        Parameters:
+        - volatility (float): The volatility of the currency pair.
+        - data (DataFrame): The historical data for the currency pair.
+
+        Returns:
+        - data (DataFrame): The DataFrame with strategy calculations.
+        """
         # Calculate indicators
         data['SMA'] = talib.SMA(data['close'], timeperiod=20)
         data['EMA'] = talib.EMA(data['close'], timeperiod=20)
@@ -161,19 +230,37 @@ class ForexTrading:
         return data
 
     def bear_strategy(self):
-        # Implement your strategy for Bear market stage
+        """
+        Implement your strategy for Bear market stage.
+        """
         pass
 
     def consolidation_strategy(self):
-        # Implement your strategy for Consolidation market stage
+        """
+        Implement your strategy for Consolidation market stage.
+        """
         pass
 
     def backtest_strategies(self):
-        # Implement your backtesting logic for each strategy
+        """
+        Implement your backtesting logic for each strategy.
+        """
         pass
 
     def place_trade(self, trade_type, currency_pair, size, stop_distance, limit_distance):
-        # Place put or call with the IG API
+        """
+        Place a trade with the IG API.
+
+        Parameters:
+        - trade_type (str): The trade type ('BUY' or 'SELL').
+        - currency_pair (str): The currency pair to trade.
+        - size (float): The trade size.
+        - stop_distance (float): The stop distance.
+        - limit_distance (float): The limit distance.
+
+        Returns:
+        - response (dict): The response from the IG API.
+        """
         trade = {
             'direction': trade_type,
             'epic': currency_pair,
@@ -191,7 +278,15 @@ class ForexTrading:
         return response
 
     def calc_strategy(self, market_stages):
-       
+        """
+        Calculate the strategy for each market stage.
+
+        Parameters:
+        - market_stages (dict): A dictionary containing the market stage, volatility, and historical data for each currency pair.
+
+        Returns:
+        - strategies (dict): A dictionary containing the strategy function for each currency pair.
+        """
         for pair, package in market_stages.items():
             print(pair)
             stage = package['stage']
@@ -207,9 +302,10 @@ class ForexTrading:
         return self.strategies
 
     def run(self):
-
+        """
+        Run the ForexTrading class.
+        """
         market_stages = self.determine_market_stage()
-        # print(market_stages)
         strategies = self.calc_strategy(market_stages)
         print(strategies)
         if test:
@@ -223,7 +319,7 @@ class ForexTrading:
         else:
 
             #TODO: Maybe use event based, instead of a while loop?
-            #TODO: Add stoploss and position sizing based on risk adversion
+            #TODO: Add stoploss and position sizing based on risk aversion
             #TODO: How to spread this accross multiple currencies concurrently?
             while True:
                 for pair, strategy_func in strategies.items():
@@ -242,6 +338,7 @@ class ForexTrading:
                     
                     # Sleep for some time before the next iteration (customize the sleep duration)
                     time.sleep(60)
+
 
 if __name__ == "__main__":
 
